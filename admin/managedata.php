@@ -10,29 +10,32 @@ if(isset($_COOKIE['admin_id'])){
 }
 
 
-if(isset($_POST['delete_playlist'])){
-   $delete_id = $_POST['playlists_id'];
-   $delete_id = filter_var($delete_id);
+// if(isset($_POST['delete_playlist'])){
+//    $delete_id = $_POST['playlists_id'];
+//    $delete_id = filter_var($delete_id);
 
-   $verify_playlist = $conn->prepare("SELECT * FROM `playlist` WHERE id = ?");
-   $verify_playlist->execute([$delete_id]);
+//    $verify_playlist = $conn->prepare("SELECT * FROM `playlist` WHERE id = ?");
+//    $verify_playlist->execute([$delete_id]);
 
-   if($verify_playlist->rowCount() > 0){
+//    if($verify_playlist->rowCount() > 0){
 
    
 
-   $delete_playlist_thumb = $conn->prepare("SELECT * FROM `playlist` WHERE id = ?");
-   $delete_playlist_thumb->execute([$delete_id]);
-   $fetch_thumb = $delete_playlist_thumb->fetch(PDO::FETCH_ASSOC);
-   $delete_bookmark = $conn->prepare("DELETE FROM `bookmark` WHERE playlist_id = ?");
-   $delete_bookmark->execute([$delete_id]);
-   $delete_playlist = $conn->prepare("DELETE FROM `playlist` WHERE id = ?");
-   $delete_playlist->execute([$delete_id]);
-   $message[] = 'playlist deleted!';
-   }else{
-      $message[] = 'playlist already deleted!';
-   }
-}
+//    $delete_playlist_thumb = $conn->prepare("SELECT * FROM `playlist` WHERE id = ?");
+//    $delete_playlist_thumb->execute([$delete_id]);
+//    $fetch_thumb = $delete_playlist_thumb->fetch(PDO::FETCH_ASSOC);
+//    $delete_bookmark = $conn->prepare("DELETE FROM `bookmark` WHERE playlist_id = ?");
+//    $delete_bookmark->execute([$delete_id]);
+//    $delete_playlist = $conn->prepare("DELETE FROM `playlist` WHERE id = ?");
+//    $delete_playlist->execute([$delete_id]);
+//    $message[] = 'playlist deleted!';
+//    }else{
+//       $message[] = 'playlist already deleted!';
+//    }
+
+
+
+// }
 
 if(isset($_POST['delete_video'])){
    $delete_id = $_POST['video_id'];
@@ -56,6 +59,31 @@ if(isset($_POST['delete_video'])){
    }else{
       $message[] = 'video already deleted!';
    }
+
+}
+if(isset($_POST['updatepost'])){
+
+   $status = $_POST['status'];
+   $status = filter_var($status, FILTER_SANITIZE_STRING);
+   
+
+   $update_content = $conn->prepare("UPDATE `post` SET  status = ? ");
+   $update_content->execute([ $status]);
+
+   $message[] = 'post updated!';
+
+}
+
+if(isset($_POST['updatecontent'])){
+
+   $status = $_POST['status'];
+   $status = filter_var($status, FILTER_SANITIZE_STRING);
+   
+
+   $update_content = $conn->prepare("UPDATE `content` SET  status = ? ");
+   $update_content->execute([ $status]);
+
+   $message[] = 'content updated!';
 
 }
 
@@ -107,7 +135,7 @@ if(isset($_POST['delete_post'])){
 <?php include '../components/admin_header.php'; ?>
    
 <section class="contents">
-<h1 class="heading">Manage Playlist</h1>
+<!-- <h1 class="heading">Manage Playlist</h1>
      
      <div class="box-container">
   
@@ -126,12 +154,13 @@ if(isset($_POST['delete_post'])){
            </div>
            <img src="../uploaded_files/<?= $fetch_tutor['thumb']; ?>" class="thumb" alt="">
            <h3 style="font-size:2.5rem;"><?= $fetch_tutor['title']; ?></h3>
+           <h3 style="font-size:1.7rem;color: var(--light-color);"><?= $fetch_tutor['description']; ?></h3>
            <h3  style="font-size:1.7rem;color: var(--light-color); "><?= $fetch_tutor['date']; ?></h3>
            <form action="" method="post" class="flex-btn">
               <input type="hidden" name="playlists_id" value="<?= $fetch_tutor['id']; ?>">
               <input type="submit" value="delete" class="delete-btn" onclick="return confirm('delete this video?');" name="delete_playlist">
            </form>
-           <!-- <a href="view_post.php?get_id=<?= $video_id; ?>" class="btn">view post</a> -->
+           <a href="view_post.php?get_id=<?= $video_id; ?>" class="btn">view post</a>
         </div>
         <?php
               }
@@ -140,7 +169,7 @@ if(isset($_POST['delete_post'])){
            }
         ?>
   
-     </div>
+     </div> -->
    <h1 class="heading">Manage Video</h1>
      
    <div class="box-container">
@@ -158,14 +187,24 @@ if(isset($_POST['delete_post'])){
       <div class="box">
          <div class="flex">
          </div>
+         <div><i class="fas fa-dot-circle" style="font-size:3rem;margin-right:.7rem;<?php if($fetch_tutor['status'] == 'active'){echo 'color:limegreen'; }else{echo 'color:red';} ?>"></i><span style="font-size:1.5rem;<?php if($fetch_tutor['status'] == 'active'){echo 'color:limegreen'; }else{echo 'color:red';} ?>"><?= $fetch_tutor['status']; ?></span></div>
          <img src="../uploaded_files/<?= $fetch_tutor['thumb']; ?>" class="thumb" alt="">
          <h3 style="font-size:2.5rem;"><?= $fetch_tutor['title']; ?></h3>
+         <h3 style="font-size:1.7rem;color: var(--light-color);"><?= $fetch_tutor['description']; ?></h3>
          <h3  style="font-size:1.7rem;color: var(--light-color); "><?= $fetch_tutor['date']; ?></h3>
          <form action="" method="post" class="flex-btn">
             <input type="hidden" name="video_id" value="<?= $fetch_tutor['id']; ?>">
             <input type="submit" value="delete" class="delete-btn" onclick="return confirm('delete this video?');" name="delete_video">
          </form>
-         <!-- <a href="view_post.php?get_id=<?= $video_id; ?>" class="btn">view post</a> -->
+         <form action="" method="post" enctype="multipart/form-data">
+         <p style="font-size:1.7rem;color: var(--light-color);">update status </p>
+      <select name="status" class="box" required>
+         <option value="<?= $fetch_tutor['status']; ?>" selected><?= $fetch_tutor['status']; ?></option>
+         <option value="active" style="color:limegreen;">active</option>
+         <option value="deactive"  style="color:red;">deactive</option>
+      </select>
+<input type="submit" value="update" name="updatecontent" class="option-btn">
+            </form>
       </div>
       <?php
             }
@@ -188,14 +227,24 @@ if(isset($_POST['delete_post'])){
       <div class="box">
          <div class="flex">
          </div>
+         <div><i class="fas fa-dot-circle" style="font-size:3rem;margin-right:.7rem;<?php if($fetch_tutor['status'] == 'active'){echo 'color:limegreen'; }else{echo 'color:red';} ?>"></i><span style="font-size:1.5rem;<?php if($fetch_tutor['status'] == 'active'){echo 'color:limegreen'; }else{echo 'color:red';} ?>"><?= $fetch_tutor['status']; ?></span></div>
          <img src="../uploaded_files/<?= $fetch_tutor['thumb']; ?>" class="thumb" alt="">
          <h3 style="font-size:2.5rem;"><?= $fetch_tutor['title']; ?></h3>
+         <h3 style="font-size:1.7rem;color: var(--light-color);"><?= $fetch_tutor['description']; ?></h3>
          <h3  style="font-size:1.7rem;color: var(--light-color); "><?= $fetch_tutor['date']; ?></h3>
          <form action="" method="post" class="flex-btn">
             <input type="hidden" name="post_id" value="<?= $fetch_tutor['id']; ?>">
             <input type="submit" value="delete" class="delete-btn" onclick="return confirm('delete this post?');" name="delete_post">
          </form>
-         <!-- <a href="view_post.php?get_id=<?= $video_id; ?>" class="btn">view post</a> -->
+         <form action="" method="post" enctype="multipart/form-data">
+      <p style="font-size:1.7rem;color: var(--light-color);">update status </p>
+      <select name="status" class="box" required>
+         <option value="<?= $fetch_tutor['status']; ?>" selected><?= $fetch_tutor['status'];?></option>
+         <option value="active" style="color:limegreen;">active</option>
+         <option value="deactive"  style="color:red;">deactive</option>
+      </select>
+      <input type="submit" value="update"  name="updatepost" class="option-btn">
+            </form>
       </div>
       <?php
             }
@@ -213,7 +262,9 @@ if(isset($_POST['delete_post'])){
 
 
 <style>
- 
+   .actives {
+      color:green;
+   }
 </style>
 
 
